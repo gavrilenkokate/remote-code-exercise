@@ -3,7 +3,7 @@ const assert = require("assert");
 const axios = require("axios");
 const httpClient = axios.create({
   baseURL: "http://" + config.serverHost + "/",
-  timeout: 10000, // specifies the number of milliseconds before the request times out
+  timeout: config.httpReqTimeout, // specifies the number of milliseconds before the request times out
 });
 
 function assertInt(value) {
