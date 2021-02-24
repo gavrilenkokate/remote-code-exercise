@@ -5,6 +5,7 @@ const httpClient = axios.create({
   baseURL: "http://" + config.serverHost + "/",
   timeout: config.httpReqTimeout, // specifies the number of milliseconds before the request times out
 });
+const updateDelay = 60000; // 1 minute
 
 function assertInt(value) {
   assert.ok(
@@ -18,36 +19,50 @@ function compareUser(user1, user2) {
 }
 
 describe("/GET top users", () => {
-  it("it should GET a two top users with most points", (done) => {
+  it("it should verify response status", (done) => {
     httpClient.get("/").then(function (response) {
       try {
-        var data = response.data;
         assert.strictEqual(response.status, 200);
-        assertInt(Date.parse(data["timestamp"]));
-        assert.ok(data["users"], "data doesn't have 'users' field");
-        var users = data["users"];
-        assert.strictEqual(users.length, 2);
-
-        for (i = 0; i < users.length; i++) {
-          assertInt(users[i]["id"]);
-          assertInt(users[i]["points"]);
-        }
-
         done();
       } catch (err) {
         done(err);
       }
     });
   }).timeout(config.httpReqTimeout);
-});
 
-describe("/GET top users", () => {
-  it("timestamp from the response is set to a time when a query was issued", (done) => {
+  it("it should verify that returned timestamp format is valid", (done) => {
+    httpClient.get("/").then(function (response) {
+      try {
+        var data = response.data;
+        assertInt(Date.parse(data["timestamp"]));
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  }).timeout(config.httpReqTimeout);
+
+  it("it should verify that endpoint returns a list of the 2 users", (done) => {
+    httpClient.get("/").then(function (response) {
+      try {
+        var data = response.data;
+        var users = data["users"];
+        assert.strictEqual(users.length, 2);
+        for (i = 0; i < users.length; i++) {
+          assertInt(users[i]["id"]);
+          assertInt(users[i]["points"]);
+        }
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  }).timeout(config.httpReqTimeout);
+
+  it("it should verify that timestamp from the response is set to a time when a query was issued", (done) => {
     httpClient.get("/").then(function (response1) {
       httpClient.get("/").then(function (response2) {
         try {
-          console.log(response1.data["timestamp"]);
-          console.log(response2.data["timestamp"]);
           var oldDate = new Date(response1.data["timestamp"]);
           var currDate = new Date(response2.data["timestamp"]);
           assert.ok(
@@ -61,11 +76,8 @@ describe("/GET top users", () => {
       });
     });
   }).timeout(config.httpReqTimeout * 2);
-});
 
-describe("/GET top users", () => {
-  var updateDelay = 60000; // 1 minute
-  it("points regenerated after 1 minute", (done) => {
+  it("it should verify that points regenerated after 1 minute", (done) => {
     httpClient.get("/").then(function (response1) {
       setTimeout(
         () =>
@@ -75,7 +87,6 @@ describe("/GET top users", () => {
               var currUsers = response2.data["users"];
               prevUsers.sort(compareUser);
               currUsers.sort(compareUser);
-
               assert.notDeepStrictEqual(prevUsers, currUsers);
               done();
             } catch (err) {
