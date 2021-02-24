@@ -58,6 +58,10 @@ There no requirements for response time and throughput (requests/sec) for the gi
 
 ## Used tools and framefworks: Node.js, Axios(HTTP client for the browser and node.js), Mocha.js, Mochawesome.
 
+## Test reports
+
+Test reports can be found in `remote-code-exercise/mochawesome-report`
+
 ## How to run
 
 1. Install Node.js
